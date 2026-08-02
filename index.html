@@ -3,10 +3,30 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HomeGround — Ground at Home, Grown with Love</title>
+<title>Miyas Homemades — Fresh, Homemade, Healthy</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Manrope:wght@400;500;600;700;800&family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&family=Merriweather:wght@400;700&family=Work+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics-compat.js"></script>
+<script>
+  /* Your Miyas Homemades Firebase project */
+  const firebaseConfig = {
+    apiKey: "AIzaSyDkZKNDy1B0Irsr-D1oUE-9uyRlyWYqnJw",
+    authDomain: "miyas-homemades.firebaseapp.com",
+    projectId: "miyas-homemades",
+    storageBucket: "miyas-homemades.firebasestorage.app",
+    messagingSenderId: "74319575773",
+    appId: "1:74319575773:web:4851f38e79fe143ad73934",
+    measurementId: "G-STQVLQMRQS"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+  try{ firebase.analytics(); }catch(e){ console.warn('Analytics not available:', e); }
+</script>
 <style>
   :root{
     --cream: #FBF3E4;
@@ -1223,11 +1243,11 @@
         </div>
         <div class="form-row2">
           <div class="field" id="fieldArea"><label for="custArea">Area</label><input type="text" id="custArea" placeholder="e.g. Anna Nagar"><span class="err-msg">Required</span></div>
-          <div class="field autocomplete-wrap" id="fieldCity"><label for="custCity">City</label><input type="text" id="custCity" placeholder="Enter your city" autocomplete="off"><div class="autocomplete-list" id="cityList"></div><span class="err-msg">Required</span></div>
+          <div class="field autocomplete-wrap" id="fieldCity"><label for="custCity">City</label><input type="text" id="custCity" placeholder="Start typing…" autocomplete="off"><div class="autocomplete-list" id="cityList"></div><span class="err-msg">Required</span></div>
         </div>
         <div class="form-row2">
-          <div class="field autocomplete-wrap" id="fieldDistrict"><label for="custDistrict">District</label><input type="text" id="custDistrict" placeholder="Enter your district" autocomplete="off"><div class="autocomplete-list" id="districtList"></div><span class="err-msg">Required</span></div>
-          <div class="field autocomplete-wrap" id="fieldState"><label for="custState">State</label><input type="text" id="custState" placeholder="Enter your state" autocomplete="off"><div class="autocomplete-list" id="stateList"></div><span class="err-msg">Required</span></div>
+          <div class="field autocomplete-wrap" id="fieldDistrict"><label for="custDistrict">District</label><input type="text" id="custDistrict" placeholder="Start typing…" autocomplete="off"><div class="autocomplete-list" id="districtList"></div><span class="err-msg">Required</span></div>
+          <div class="field autocomplete-wrap" id="fieldState"><label for="custState">State</label><input type="text" id="custState" placeholder="Start typing…" autocomplete="off"><div class="autocomplete-list" id="stateList"></div><span class="err-msg">Required</span></div>
         </div>
         <div class="form-row2">
           <div class="field" id="fieldPincode"><label for="custPincode">Pin code</label><input type="text" id="custPincode" placeholder="e.g. 600040" inputmode="numeric"><span class="err-msg">Enter a valid 6-digit pin code</span></div>
@@ -1310,45 +1330,24 @@
 
       <!-- STEP: forgot password — enter account email -->
       <div id="loginStepForgotEmail" style="display:none;">
-        <p style="font-size:0.82rem; color:var(--ink-soft); margin-bottom:16px;">Enter the email your admin login is registered with. We'll open a password-reset code as an email draft from your own inbox — since this site has no email server, you'll need to send it to yourself.</p>
+        <p style="font-size:0.82rem; color:var(--ink-soft); margin-bottom:16px;">Enter the email your admin login is registered with. We'll send a real password-reset link to that inbox.</p>
         <div class="field" id="fieldForgotEmail">
           <label for="forgotEmail">Account email</label>
           <input type="email" id="forgotEmail" placeholder="you@miyashomemades.com" autocomplete="username">
-          <span class="err-msg">No admin account uses this email</span>
+          <span class="err-msg">Enter a valid email</span>
         </div>
-        <button class="btn btn-primary paynow-btn" id="sendResetCodeBtn">Send reset code</button>
+        <button class="btn btn-primary paynow-btn" id="sendResetCodeBtn">Send reset link</button>
         <p style="text-align:center; font-size:0.82rem; margin-top:14px;"><a href="#" id="backToLoginFromEmail" style="color:var(--ink-soft);">← Back to login</a></p>
       </div>
 
-      <!-- STEP: forgot password — enter OTP -->
+      <!-- STEP: forgot password — confirmation -->
       <div id="loginStepForgotOtp" style="display:none;">
-        <p style="font-size:0.82rem; color:var(--ink-soft); margin-bottom:16px;">An email draft with your 6-digit code opened in a new tab — hit send in your own mail app, then enter that code below to continue. Code expires in 10 minutes.</p>
-        <div class="field" id="fieldOtp">
-          <label for="otpInput">6-digit code</label>
-          <input type="text" id="otpInput" placeholder="123456" inputmode="numeric" maxlength="6">
-          <span class="err-msg">Incorrect or expired code</span>
-        </div>
-        <button class="btn btn-primary paynow-btn" id="verifyOtpBtn">Verify code</button>
-        <p style="text-align:center; font-size:0.82rem; margin-top:14px;">
-          <a href="#" id="resendOtpLink" style="color:var(--kavuni-light); font-weight:700;">Resend code</a>
+        <p style="font-size:0.86rem; color:var(--ink-soft); margin-bottom:16px;">If that email has an admin account, a password-reset link just arrived in its inbox (check spam too). Open it, set a new password there, then come back and log in.</p>
+        <p style="text-align:center; font-size:0.82rem;">
+          <a href="#" id="resendOtpLink" style="color:var(--kavuni-light); font-weight:700;">Send again</a>
           &nbsp;·&nbsp;
           <a href="#" id="backToLoginFromOtp" style="color:var(--ink-soft);">Back to login</a>
         </p>
-      </div>
-
-      <!-- STEP: forgot password — set new password -->
-      <div id="loginStepNewPass" style="display:none;">
-        <div class="field" id="fieldNewPass">
-          <label for="newPassInput">New password</label>
-          <input type="password" id="newPassInput" placeholder="At least 4 characters" autocomplete="new-password">
-          <span class="err-msg">Password must be at least 4 characters</span>
-        </div>
-        <div class="field" id="fieldNewPassConfirm">
-          <label for="newPassConfirmInput">Confirm new password</label>
-          <input type="password" id="newPassConfirmInput" placeholder="Re-enter password" autocomplete="new-password">
-          <span class="err-msg">Passwords don't match</span>
-        </div>
-        <button class="btn btn-primary paynow-btn" id="resetPasswordBtn">Reset password</button>
       </div>
     </div>
   </div>
@@ -1393,6 +1392,10 @@
       <button class="exit-link" id="exitAdmin">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         <span class="lbl">Exit to store</span>
+      </button>
+      <button class="exit-link" id="logoutAdmin" style="margin-top:6px;">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
+        <span class="lbl">Log out</span>
       </button>
     </aside>
 
@@ -1755,25 +1758,8 @@
 <div class="toast" id="toast"></div>
 
 <script>
-/* ---------------- STORAGE ----------------
-   window.storage only exists inside Claude's own preview/artifact environment.
-   On a real deployment (GitHub Pages, your own server, etc.) it doesn't exist at all,
-   so we fall back to the browser's built-in localStorage — this makes data persist
-   for real once this file is hosted on its own domain. Note: localStorage is saved
-   per browser/device, not synced across different phones/computers or browser profiles;
-   a truly cross-device shared store would need a real backend database. */
-const storage = (window.storage && typeof window.storage.get === 'function') ? window.storage : {
-  async get(key){
-    try{
-      const v = localStorage.getItem(key);
-      return v === null ? null : { key, value: v };
-    }catch(e){ return null; }
-  },
-  async set(key, value){
-    try{ localStorage.setItem(key, value); }catch(e){}
-    return { key, value };
-  },
-};
+/* Data persistence now runs through Firebase (db = Firestore, auth = Firebase Auth) —
+   both initialized in <head>. See the FIRESTORE / AUTH sections further down. */
 
 /* ---------------- DATA ---------------- */
 let PRODUCTS = [
@@ -1851,8 +1837,9 @@ let siteSettings = {
   upiId: '', upiName: 'Miyas Homemades',
   bankHolder: '', bankName: '', accountNumber: '', ifsc: '',
 };
-let admins = []; // { email, password, role: 'super' | 'co-admin', addedAt }
-let currentAdmin = null; // set after a successful login: { email, role }
+let admins = []; // populated live from Firestore 'adminRoles' collection: { uid, email, role: 'super' | 'co-admin', addedAt }
+let currentAdmin = null; // set after a successful Firebase sign-in: { uid, email, role }
+let hasAnyAdmin = false; // from the public store/meta doc — decides first-login setup vs normal login
 let categories = [
   { id:'brownies', label:'Brownies' },
   { id:'rice', label:'Rice & Flour' },
@@ -2416,15 +2403,13 @@ function showSuccess(message){
     payment: PAYMENT_LABEL[selectedPayment] || selectedPayment,
     status: 'Pending', trackingId: null, trackingLink: null,
   };
-  orders.unshift(order);
-
   // decrement stock for ordered items
   order.items.forEach(item => {
     const p = PRODUCTS.find(x => x.id === item.id);
     if(p) p.stock = Math.max(0, (p.stock ?? 20) - item.qty);
   });
   saveProducts();
-  saveOrders();
+  saveOrder(order);
 
   checkoutFormState.style.display = 'none';
   checkoutSuccessState.style.display = 'block';
@@ -2528,11 +2513,13 @@ document.getElementById('revSubmitBtn').addEventListener('click', () => {
   document.getElementById('fieldRevComment').classList.toggle('error', !commentOk);
   if(!nameOk || !emailOk || !commentOk) return;
 
-  reviews.push({
+  const newReview = {
     id: 'rev' + Date.now(), name, email, rating: selectedRating, comment,
     photo: revPhoto, date: new Date().toISOString(),
-  });
-  saveReviews();
+  };
+  reviews.unshift(newReview);
+  renderTesti();
+  saveReview(newReview);
   reviewFormOverlay.classList.remove('show');
   showToast('Thank you for your review!');
 });
@@ -2546,87 +2533,124 @@ let orders = [];
 let nextProductNum = 100;
 const STATUS_FLOW = ['Pending','Confirmed','Shipped','Out for Delivery','Delivered'];
 
-/* ---- lightweight persistence (works inside the artifact runtime; degrades to in-memory otherwise) ---- */
+/* ---- Firestore persistence ---- */
 async function loadState(){
   try{
-    const p = await storage.get('hg_products');
-    if(p && p.value) PRODUCTS = JSON.parse(p.value);
-  }catch(e){ /* no stored products yet, or storage unavailable — keep defaults */ }
+    const p = await db.collection('store').doc('products').get();
+    if(p.exists && p.data().items) PRODUCTS = p.data().items;
+  }catch(e){ console.error('Failed to load products from Firestore:', e); }
   try{
-    const o = await storage.get('hg_orders');
-    if(o && o.value) orders = JSON.parse(o.value);
-  }catch(e){ /* no stored orders yet, or storage unavailable */ }
+    const c = await db.collection('store').doc('coupon').get();
+    if(c.exists) coupon = { ...coupon, ...c.data() };
+  }catch(e){ console.error('Failed to load coupon from Firestore:', e); }
   try{
-    const c = await storage.get('hg_coupon');
-    if(c && c.value) coupon = JSON.parse(c.value);
-  }catch(e){ /* no stored coupon yet, or storage unavailable */ }
+    const s = await db.collection('store').doc('settings').get();
+    if(s.exists) siteSettings = { ...siteSettings, ...s.data() };
+  }catch(e){ console.error('Failed to load settings from Firestore:', e); }
   try{
-    const s = await storage.get('hg_settings');
-    if(s && s.value) siteSettings = { ...siteSettings, ...JSON.parse(s.value) };
-  }catch(e){ /* no stored settings yet, or storage unavailable */ }
+    const cat = await db.collection('store').doc('categories').get();
+    if(cat.exists && cat.data().items) categories = cat.data().items;
+  }catch(e){ console.error('Failed to load categories from Firestore:', e); }
   try{
-    const a = await storage.get('hg_admins');
-    if(a && a.value) admins = JSON.parse(a.value);
-  }catch(e){ /* no stored admins yet, or storage unavailable */ }
-  try{
-    const cat = await storage.get('hg_categories');
-    if(cat && cat.value) categories = JSON.parse(cat.value);
-  }catch(e){ /* no stored categories yet, or storage unavailable */ }
-  try{
-    const rv = await storage.get('hg_reviews');
-    if(rv && rv.value) reviews = JSON.parse(rv.value);
-  }catch(e){ /* no stored reviews yet, or storage unavailable */ }
+    const meta = await db.collection('store').doc('meta').get();
+    hasAnyAdmin = !!(meta.exists && meta.data().hasSuperAdmin);
+  }catch(e){ console.error('Failed to load store meta from Firestore:', e); }
+
+  // Reviews are public — safe to listen live for everyone browsing the storefront
+  db.collection('reviews').orderBy('date','desc').onSnapshot(snap => {
+    reviews = snap.docs.map(d => d.data());
+    renderTesti();
+    renderAdminReviews();
+  }, e => console.error('Reviews listener failed:', e));
+
   renderCategoryPills();
   renderProducts();
   renderCouponBanner();
-  renderTesti();
   applySiteSettings();
-  renderAdminOverview();
-  renderAdminOrders();
-  renderAdminProducts();
-  renderCouponPanel();
-  renderAdminReviews();
-  renderCategoryAdminList();
 }
+
+/* Orders and the admin roster contain private customer/staff data — these listeners only
+   start once someone is actually signed in as an admin, never for anonymous storefront visitors. */
+let adminListenersStarted = false;
+function startAdminListeners(){
+  if(adminListenersStarted) return;
+  adminListenersStarted = true;
+  db.collection('orders').orderBy('date','desc').onSnapshot(snap => {
+    orders = snap.docs.map(d => d.data());
+    renderAdminOverview();
+    renderAdminOrders();
+  }, e => console.error('Orders listener failed:', e));
+  db.collection('adminRoles').onSnapshot(snap => {
+    admins = snap.docs.map(d => ({ uid: d.id, ...d.data() }));
+    renderTeamPanel();
+  }, e => console.error('Admin roster listener failed:', e));
+}
+
 async function saveProducts(){
   renderProducts();
   renderAdminProducts();
   renderAdminOverview();
-  try{ await storage.set('hg_products', JSON.stringify(PRODUCTS)); }catch(e){}
+  try{ await db.collection('store').doc('products').set({ items: PRODUCTS }); }
+  catch(e){ console.error('Failed to save products:', e); showToast('Could not save — check your Firebase setup'); }
 }
-async function saveOrders(){
-  try{ await storage.set('hg_orders', JSON.stringify(orders)); }catch(e){}
+async function saveOrder(order){
+  try{ await db.collection('orders').doc(order.id).set(order); }
+  catch(e){ console.error('Failed to save order:', e); showToast('Could not save the order — check your Firebase setup'); }
+}
+async function updateOrder(orderId, changes){
+  try{ await db.collection('orders').doc(orderId).update(changes); }
+  catch(e){ console.error('Failed to update order:', e); showToast('Could not update the order — check your Firebase setup'); }
 }
 async function saveCoupon(){
   renderCouponBanner();
-  try{ await storage.set('hg_coupon', JSON.stringify(coupon)); }catch(e){}
+  try{ await db.collection('store').doc('coupon').set(coupon); }
+  catch(e){ console.error('Failed to save coupon:', e); showToast('Could not save — check your Firebase setup'); }
 }
 async function saveSettings(){
   applySiteSettings();
-  try{ await storage.set('hg_settings', JSON.stringify(siteSettings)); }catch(e){}
+  try{ await db.collection('store').doc('settings').set(siteSettings); }
+  catch(e){ console.error('Failed to save settings:', e); showToast('Could not save — check your Firebase setup'); }
 }
 async function saveCategories(){
   renderCategoryPills();
   renderProducts();
   renderCategoryAdminList();
-  try{ await storage.set('hg_categories', JSON.stringify(categories)); }catch(e){}
+  try{ await db.collection('store').doc('categories').set({ items: categories }); }
+  catch(e){ console.error('Failed to save categories:', e); showToast('Could not save — check your Firebase setup'); }
 }
-async function saveReviews(){
-  renderTesti();
-  renderAdminReviews();
-  try{ await storage.set('hg_reviews', JSON.stringify(reviews)); }catch(e){}
+async function saveReview(review){
+  try{ await db.collection('reviews').doc(review.id).set(review); }
+  catch(e){ console.error('Failed to save review:', e); showToast('Could not submit — check your Firebase setup'); }
 }
-async function saveAdmins(){
-  renderTeamPanel();
-  try{ await storage.set('hg_admins', JSON.stringify(admins)); }catch(e){}
+async function deleteReview(reviewId){
+  try{ await db.collection('reviews').doc(reviewId).delete(); }
+  catch(e){ console.error('Failed to delete review:', e); showToast('Could not delete — check your Firebase setup'); }
 }
-loadState();
+const stateReady = loadState();
 
-/* ---- admin login: first login sets up the Super Admin, later logins check the team list ---- */
+/* ---- admin login: Firebase Authentication (real accounts, real password reset emails) ---- */
 const pinOverlay = document.getElementById('pinOverlay');
 const loginEmail = document.getElementById('loginEmail');
 const loginPassword = document.getElementById('loginPassword');
 let adminAuthed = false;
+
+// Restores the session automatically on reload if Firebase still has you signed in —
+// this is real auth now, so (unlike before) you generally won't need to log in every single visit.
+auth.onAuthStateChanged(async (user) => {
+  if(user){
+    try{
+      const roleDoc = await db.collection('adminRoles').doc(user.uid).get();
+      if(roleDoc.exists){
+        currentAdmin = { uid: user.uid, email: user.email, role: roleDoc.data().role };
+        adminAuthed = true;
+        startAdminListeners();
+      }
+    }catch(e){ console.error('Failed to load your admin role:', e); }
+  }else{
+    currentAdmin = null;
+    adminAuthed = false;
+  }
+});
 
 function openLoginModal(allowBypass){
   if(!siteSettings.storeLoginEnabled && !allowBypass){
@@ -2640,7 +2664,7 @@ function openLoginModal(allowBypass){
   document.getElementById('fieldLoginPasswordConfirm').classList.remove('error');
   showLoginStep('creds');
 
-  const isFirstLogin = admins.length === 0;
+  const isFirstLogin = !hasAnyAdmin;
   document.getElementById('setupNotice').style.display = isFirstLogin ? 'block' : 'none';
   document.getElementById('fieldLoginPasswordConfirm').style.display = isFirstLogin ? 'block' : 'none';
   document.getElementById('loginTitle').textContent = isFirstLogin ? 'Create Super Admin' : 'Store login';
@@ -2660,8 +2684,8 @@ function checkAdminHash(){
   if(window.location.hash === '#admin-recovery') openLoginModal(true);
   else if(window.location.hash === '#admin') openLoginModal(false);
 }
-checkAdminHash();
-window.addEventListener('hashchange', checkAdminHash);
+stateReady.then(checkAdminHash); // wait for store meta (hasAnyAdmin) to finish loading first
+window.addEventListener('hashchange', checkAdminHash); // later navigation — state is already loaded by then
 
 function renderStoreLoginToggle(){
   const panel = document.getElementById('storeLoginTogglePanel');
@@ -2676,56 +2700,85 @@ document.getElementById('storeLoginToggle').addEventListener('click', () => {
   renderStoreLoginToggle();
 });
 
-document.getElementById('loginSubmitBtn').addEventListener('click', () => {
+function friendlyAuthError(e){
+  const map = {
+    'auth/wrong-password': 'Incorrect email or password',
+    'auth/user-not-found': 'Incorrect email or password',
+    'auth/invalid-email': 'Enter a valid email',
+    'auth/email-already-in-use': 'That email already has an account',
+    'auth/weak-password': 'Password must be at least 6 characters',
+    'auth/too-many-requests': 'Too many attempts — please wait a moment and try again',
+  };
+  return map[e.code] || e.message || 'Something went wrong';
+}
+
+document.getElementById('loginSubmitBtn').addEventListener('click', async () => {
   const email = loginEmail.value.trim();
-  const isFirstLogin = admins.length === 0;
+  const isFirstLogin = !hasAnyAdmin;
+  const btn = document.getElementById('loginSubmitBtn');
 
   if(isFirstLogin){
     const password = loginPassword.value;
     const confirm = document.getElementById('loginPasswordConfirm').value;
     const emailOk = /^\S+@\S+\.\S+$/.test(email);
-    const passOk = password.length >= 4;
+    const passOk = password.length >= 6;
     const matchOk = password === confirm && passOk;
     document.getElementById('fieldLoginEmail').classList.toggle('error', !emailOk);
     document.getElementById('fieldLoginPassword').classList.toggle('error', !passOk);
     document.getElementById('fieldLoginPasswordConfirm').classList.toggle('error', !matchOk);
     if(!emailOk || !passOk || !matchOk) return;
 
-    admins.push({ email, password, role: 'super', addedAt: new Date().toISOString() });
-    saveAdmins();
-    currentAdmin = { email, role: 'super' };
-    adminAuthed = true;
-    pinOverlay.classList.remove('show');
-    openAdmin();
+    btn.disabled = true; btn.textContent = 'Creating account…';
+    try{
+      const cred = await auth.createUserWithEmailAndPassword(email, password);
+      await db.collection('adminRoles').doc(cred.user.uid).set({
+        email, role: 'super', addedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      });
+      await db.collection('store').doc('meta').set({ hasSuperAdmin: true }, { merge: true });
+      hasAnyAdmin = true;
+      currentAdmin = { uid: cred.user.uid, email, role: 'super' };
+      adminAuthed = true;
+      startAdminListeners();
+      pinOverlay.classList.remove('show');
+      openAdmin();
+    }catch(e){
+      document.getElementById('fieldLoginPassword').classList.add('error');
+      document.getElementById('loginPasswordErr').textContent = friendlyAuthError(e);
+      showToast(friendlyAuthError(e));
+    }finally{
+      btn.disabled = false; btn.textContent = 'Create account & log in';
+    }
     return;
   }
 
-  const match = admins.find(a => a.email.toLowerCase() === email.toLowerCase() && a.password === loginPassword.value);
-  document.getElementById('fieldLoginEmail').classList.toggle('error', !match);
-  document.getElementById('fieldLoginPassword').classList.toggle('error', !match);
-  if(match){
-    currentAdmin = { email: match.email, role: match.role };
+  btn.disabled = true; btn.textContent = 'Signing in…';
+  try{
+    const cred = await auth.signInWithEmailAndPassword(email, loginPassword.value);
+    const roleDoc = await db.collection('adminRoles').doc(cred.user.uid).get();
+    currentAdmin = { uid: cred.user.uid, email: cred.user.email, role: roleDoc.exists ? roleDoc.data().role : 'co-admin' };
     adminAuthed = true;
+    startAdminListeners();
     pinOverlay.classList.remove('show');
     openAdmin();
+  }catch(e){
+    document.getElementById('fieldLoginEmail').classList.add('error');
+    document.getElementById('fieldLoginPassword').classList.add('error');
+    document.getElementById('loginPasswordErr').textContent = friendlyAuthError(e);
+  }finally{
+    btn.disabled = false; btn.textContent = 'Log in';
   }
 });
 loginPassword.addEventListener('keydown', e => { if(e.key === 'Enter') document.getElementById('loginSubmitBtn').click(); });
 
-/* ---- forgot password: OTP-style reset via an email draft (no backend, so it's opened for the
-   admin to send to themselves rather than sent automatically — see chat for the full explanation) ---- */
-let resetFlow = { email:'', otp:'', expiresAt:0 };
-
+/* ---- forgot password: a REAL email, sent by Firebase itself (not a mailto draft) ---- */
 function showLoginStep(step){
   document.getElementById('loginStepCreds').style.display = step === 'creds' ? 'block' : 'none';
   document.getElementById('loginStepForgotEmail').style.display = step === 'forgotEmail' ? 'block' : 'none';
   document.getElementById('loginStepForgotOtp').style.display = step === 'forgotOtp' ? 'block' : 'none';
-  document.getElementById('loginStepNewPass').style.display = step === 'newPass' ? 'block' : 'none';
   const titles = {
     creds: null, // left as set by openLoginModal
-    forgotEmail: ['Reset password', 'Confirm your account email'],
-    forgotOtp: ['Enter your code', 'Sent to your registered email'],
-    newPass: ['Choose a new password', 'Almost done'],
+    forgotEmail: ['Reset password', 'Enter your account email'],
+    forgotOtp: ['Check your email', 'We sent you a reset link'],
   };
   if(titles[step]){
     document.getElementById('loginTitle').textContent = titles[step][0];
@@ -2742,61 +2795,31 @@ document.getElementById('forgotPasswordLink').addEventListener('click', e => {
 document.getElementById('backToLoginFromEmail').addEventListener('click', e => { e.preventDefault(); openLoginModal(true); });
 document.getElementById('backToLoginFromOtp').addEventListener('click', e => { e.preventDefault(); openLoginModal(true); });
 
-function generateAndSendOtp(email){
-  const otp = String(Math.floor(100000 + Math.random() * 900000));
-  resetFlow = { email, otp, expiresAt: Date.now() + 10 * 60 * 1000 };
-  const subject = `Your ${siteSettings.siteName} password reset code`;
-  const body = `Your password reset code is: ${otp}\n\nThis code expires in 10 minutes. If you didn't request this, you can ignore it.\n\n— ${siteSettings.siteName}`;
-  window.open(`mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, '_blank');
-  document.getElementById('otpInput').value = '';
-  document.getElementById('fieldOtp').classList.remove('error');
-  showLoginStep('forgotOtp');
-}
-
-document.getElementById('sendResetCodeBtn').addEventListener('click', () => {
+document.getElementById('sendResetCodeBtn').addEventListener('click', async () => {
   const email = document.getElementById('forgotEmail').value.trim();
-  const match = admins.find(a => a.email.toLowerCase() === email.toLowerCase());
-  document.getElementById('fieldForgotEmail').classList.toggle('error', !match);
-  if(!match) return;
-  generateAndSendOtp(match.email);
-  showToast('Reset code drafted — send it to yourself, then enter it below');
-});
-document.getElementById('resendOtpLink').addEventListener('click', e => {
-  e.preventDefault();
-  if(!resetFlow.email) return;
-  generateAndSendOtp(resetFlow.email);
-  showToast('New code drafted');
-});
-
-document.getElementById('verifyOtpBtn').addEventListener('click', () => {
-  const entered = document.getElementById('otpInput').value.trim();
-  const valid = entered && entered === resetFlow.otp && Date.now() < resetFlow.expiresAt;
-  document.getElementById('fieldOtp').classList.toggle('error', !valid);
-  if(!valid) return;
-  document.getElementById('newPassInput').value = '';
-  document.getElementById('newPassConfirmInput').value = '';
-  document.getElementById('fieldNewPass').classList.remove('error');
-  document.getElementById('fieldNewPassConfirm').classList.remove('error');
-  showLoginStep('newPass');
-});
-
-document.getElementById('resetPasswordBtn').addEventListener('click', () => {
-  const pass = document.getElementById('newPassInput').value;
-  const confirm = document.getElementById('newPassConfirmInput').value;
-  const passOk = pass.length >= 4;
-  const matchOk = passOk && pass === confirm;
-  document.getElementById('fieldNewPass').classList.toggle('error', !passOk);
-  document.getElementById('fieldNewPassConfirm').classList.toggle('error', !matchOk);
-  if(!passOk || !matchOk) return;
-
-  const account = admins.find(a => a.email.toLowerCase() === resetFlow.email.toLowerCase());
-  if(account){
-    account.password = pass;
-    saveAdmins();
+  if(!/^\S+@\S+\.\S+$/.test(email)){
+    document.getElementById('fieldForgotEmail').classList.add('error');
+    return;
   }
-  resetFlow = { email:'', otp:'', expiresAt:0 };
-  showToast('Password updated — log in with your new password');
-  openLoginModal(true);
+  const btn = document.getElementById('sendResetCodeBtn');
+  btn.disabled = true; btn.textContent = 'Sending…';
+  try{
+    await auth.sendPasswordResetEmail(email);
+  }catch(e){
+    // Deliberately shown the same way whether or not the email exists, so this can't be used to
+    // find out which emails have accounts — Firebase itself follows this same practice.
+    console.warn('Password reset request:', e.code);
+  }finally{
+    btn.disabled = false; btn.textContent = 'Send reset link';
+  }
+  showLoginStep('forgotOtp');
+});
+document.getElementById('resendOtpLink').addEventListener('click', async e => {
+  e.preventDefault();
+  const email = document.getElementById('forgotEmail').value.trim();
+  if(!email) return;
+  try{ await auth.sendPasswordResetEmail(email); }catch(err){ console.warn(err.code); }
+  showToast('Reset link sent again');
 });
 
 /* ---- open/close admin, tabs ---- */
@@ -2816,6 +2839,12 @@ function openAdmin(){
 document.getElementById('exitAdmin').addEventListener('click', () => {
   adminOverlay.classList.remove('show');
   document.body.style.overflow = '';
+});
+document.getElementById('logoutAdmin').addEventListener('click', async () => {
+  await auth.signOut();
+  adminOverlay.classList.remove('show');
+  document.body.style.overflow = '';
+  showToast("You've been logged out");
 });
 const PANE_META = {
   overview:{ title:'Overview', sub:'Your store at a glance' },
@@ -3100,7 +3129,7 @@ document.querySelector('#allOrdersTable tbody').addEventListener('click', e => {
     const itemsList = o.items.map(i => `${i.name} ×${i.qty}`).join(', ');
     const msg = `Hi ${o.customer.name}, thank you for your order from ${siteSettings.siteName}! 🎉\nOrder #${o.id}\nItems: ${itemsList}\nTotal: ₹${o.total}\nDelivery address: ${o.customer.address}\n\nWe've received your order and are preparing it with care. We'll message you again once it ships. 💛`;
     window.open(waLink(o.customer.phone, msg), '_blank');
-    saveOrders(); renderAdminOrders(); renderAdminOverview();
+    updateOrder(o.id, { status: 'Confirmed' });
     return;
   }
   if(sendBtn){
@@ -3114,7 +3143,7 @@ document.querySelector('#allOrdersTable tbody').addEventListener('click', e => {
     o.status = 'Shipped';
     const msg = `Hi ${o.customer.name}, your ${siteSettings.siteName} order #${o.id} has been shipped! 📦\nTracking ID: ${trackingId}${trackingLink ? `\nTrack here: ${trackingLink}` : ''}\nWe'll let you know once it's out for delivery. 💛`;
     window.open(waLink(o.customer.phone, msg), '_blank');
-    saveOrders(); renderAdminOrders(); renderAdminOverview();
+    updateOrder(o.id, { status: 'Shipped', trackingId, trackingLink: trackingLink || null });
     return;
   }
   if(outBtn){
@@ -3123,7 +3152,7 @@ document.querySelector('#allOrdersTable tbody').addEventListener('click', e => {
     o.status = 'Out for Delivery';
     const msg = `Hi ${o.customer.name}, your ${siteSettings.siteName} order #${o.id} is out for delivery today and should reach you soon! 🚚${o.trackingId ? `\nTracking ID: ${o.trackingId}` : ''}${o.trackingLink ? `\nTrack here: ${o.trackingLink}` : ''}`;
     window.open(waLink(o.customer.phone, msg), '_blank');
-    saveOrders(); renderAdminOrders(); renderAdminOverview();
+    updateOrder(o.id, { status: 'Out for Delivery' });
     return;
   }
   if(delBtn){
@@ -3132,14 +3161,15 @@ document.querySelector('#allOrdersTable tbody').addEventListener('click', e => {
     o.status = 'Delivered';
     const msg = `Hi ${o.customer.name}, your ${siteSettings.siteName} order #${o.id} has been delivered! We hope you love it. Thank you for ordering with us 💛`;
     window.open(waLink(o.customer.phone, msg), '_blank');
-    saveOrders(); renderAdminOrders(); renderAdminOverview();
+    updateOrder(o.id, { status: 'Delivered' });
     return;
   }
   if(cancelBtn){
     const idx = Number(cancelBtn.dataset.cancelOrder);
     if(confirm('Cancel this order?')){
-      orders[idx].status = 'Cancelled';
-      saveOrders(); renderAdminOrders(); renderAdminOverview();
+      const o = orders[idx];
+      o.status = 'Cancelled';
+      updateOrder(o.id, { status: 'Cancelled' });
     }
   }
 });
@@ -3250,9 +3280,9 @@ function renderAdminReviews(){
 document.getElementById('adminReviewsList')?.addEventListener('click', e => {
   const btn = e.target.closest('[data-del-review]');
   if(!btn) return;
-  if(confirm('Delete this review?')){
-    reviews.splice(Number(btn.dataset.delReview), 1);
-    saveReviews();
+  const review = reviews[Number(btn.dataset.delReview)];
+  if(review && confirm('Delete this review?')){
+    deleteReview(review.id);
     showToast('Review deleted');
   }
 });
@@ -3562,43 +3592,57 @@ document.getElementById('saveSettingsBtn').addEventListener('click', () => {
 function renderTeamPanel(){
   const body = document.querySelector('#teamTable tbody');
   if(body){
-    body.innerHTML = admins.map((a, idx) => `
+    body.innerHTML = admins.map(a => `
       <tr>
-        <td>${a.email}${currentAdmin && currentAdmin.email === a.email ? ' <span style="color:var(--ink-soft); font-size:0.76rem;">(you)</span>' : ''}</td>
+        <td>${a.email}${currentAdmin && currentAdmin.uid === a.uid ? ' <span style="color:var(--ink-soft); font-size:0.76rem;">(you)</span>' : ''}</td>
         <td><span class="order-status-pill ${a.role === 'super' ? 'Delivered' : 'Confirmed'}">${a.role === 'super' ? 'Super Admin' : 'Co-admin'}</span></td>
-        <td class="order-items-mini">${new Date(a.addedAt).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}</td>
-        <td>${(currentAdmin && currentAdmin.role === 'super' && a.role !== 'super') ? `<button class="btn-small" data-remove-admin="${idx}" style="color:var(--hibiscus);">Remove</button>` : ''}</td>
+        <td class="order-items-mini">${a.addedAt && a.addedAt.toDate ? a.addedAt.toDate().toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : '—'}</td>
+        <td>${(currentAdmin && currentAdmin.role === 'super' && a.role !== 'super') ? `<button class="btn-small" data-remove-admin="${a.uid}" style="color:var(--hibiscus);">Remove</button>` : ''}</td>
       </tr>
     `).join('') || `<tr><td colspan="4" class="empty-state">No logins yet.</td></tr>`;
   }
   const addPanel = document.getElementById('addCoAdminPanel');
   if(addPanel) addPanel.style.display = (currentAdmin && currentAdmin.role === 'super') ? 'block' : 'none';
 }
-document.querySelector('#teamTable tbody')?.addEventListener('click', e => {
+document.querySelector('#teamTable tbody')?.addEventListener('click', async e => {
   const btn = e.target.closest('[data-remove-admin]');
   if(!btn) return;
-  const idx = Number(btn.dataset.removeAdmin);
-  if(confirm(`Remove ${admins[idx].email}'s access?`)){
-    admins.splice(idx, 1);
-    saveAdmins();
+  const uid = btn.dataset.removeAdmin;
+  const acct = admins.find(a => a.uid === uid);
+  if(acct && confirm(`Remove ${acct.email}'s dashboard access? (Their login will stop working here, but you'll need the Firebase console if you also want to delete the underlying account.)`)){
+    try{ await db.collection('adminRoles').doc(uid).delete(); }
+    catch(e){ console.error(e); showToast('Could not remove — check your Firebase setup'); }
   }
 });
-document.getElementById('addCoAdminBtn').addEventListener('click', () => {
+document.getElementById('addCoAdminBtn').addEventListener('click', async () => {
   const email = document.getElementById('coAdminEmail').value.trim();
   const password = document.getElementById('coAdminPassword').value.trim();
-  if(!/^\S+@\S+\.\S+$/.test(email) || password.length < 4){
-    showToast('Enter a valid email and a password (4+ characters)');
+  if(!/^\S+@\S+\.\S+$/.test(email) || password.length < 6){
+    showToast('Enter a valid email and a password (6+ characters)');
     return;
   }
-  if(admins.some(a => a.email.toLowerCase() === email.toLowerCase())){
-    showToast('That email is already a login');
-    return;
+  const btn = document.getElementById('addCoAdminBtn');
+  btn.disabled = true; btn.textContent = 'Adding…';
+  try{
+    // Create the co-admin's login through a SEPARATE Firebase app instance so it doesn't
+    // sign the Super Admin out of their own current session (a quirk of Firebase's client SDK).
+    let secondaryApp;
+    try{ secondaryApp = firebase.app('Secondary'); }
+    catch(e){ secondaryApp = firebase.initializeApp(firebaseConfig, 'Secondary'); }
+    const secondaryAuth = secondaryApp.auth();
+    const cred = await secondaryAuth.createUserWithEmailAndPassword(email, password);
+    await db.collection('adminRoles').doc(cred.user.uid).set({
+      email, role: 'co-admin', addedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+    await secondaryAuth.signOut();
+    document.getElementById('coAdminEmail').value = '';
+    document.getElementById('coAdminPassword').value = '';
+    showToast('Co-admin added');
+  }catch(e){
+    showToast(friendlyAuthError(e));
+  }finally{
+    btn.disabled = false; btn.textContent = 'Add co-admin';
   }
-  admins.push({ email, password, role: 'co-admin', addedAt: new Date().toISOString() });
-  saveAdmins();
-  document.getElementById('coAdminEmail').value = '';
-  document.getElementById('coAdminPassword').value = '';
-  showToast('Co-admin added');
 });
 
 /* ---- Contact us button ---- */
